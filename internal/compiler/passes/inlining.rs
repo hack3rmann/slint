@@ -100,7 +100,7 @@ fn inline_element(
     elem_mut.property_declarations.extend(
         inlined_component.root_element.borrow().property_declarations.iter().map(|(name, decl)| {
             let mut decl = decl.clone();
-            decl.expose_in_public_api = false;
+            decl.expose_in_public_api = true;
             (name.clone(), decl)
         }),
     );
