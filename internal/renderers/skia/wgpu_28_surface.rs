@@ -7,11 +7,12 @@ use i_slint_core::api::{PhysicalSize as PhysicalWindowSize, Window};
 use i_slint_core::graphics::RequestedGraphicsAPI;
 use i_slint_core::partial_renderer::DirtyRegion;
 use i_slint_core::platform::PlatformError;
+use wgpu::wgt::SurfaceConfiguration;
 
 use std::cell::RefCell;
 use std::sync::Arc;
 
-use wgpu_28 as wgpu;
+use wgpu_28::{self as wgpu, wgt};
 
 use crate::SkiaSharedContext;
 
@@ -53,8 +54,20 @@ impl WGPUSurface {
                     }),
             )?;
 
-        let mut surface_config =
-            surface.get_default_config(&adapter, size.width, size.height).unwrap();
+        let mut surface_config = {
+            let caps = surface.get_capabilities(&adapter);
+
+            SurfaceConfiguration {
+                usage: wgt::TextureUsages::RENDER_ATTACHMENT,
+                format: *caps.formats.first().unwrap(),
+                width: size.width,
+                height: size.height,
+                desired_maximum_frame_latency: 2,
+                present_mode: *caps.present_modes.first().unwrap(),
+                alpha_mode: wgt::CompositeAlphaMode::PreMultiplied,
+                view_formats: vec![],
+            }
+        };
 
         let swapchain_capabilities = surface.get_capabilities(&adapter);
         let swapchain_format = swapchain_capabilities
