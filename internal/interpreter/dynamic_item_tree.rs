@@ -2920,7 +2920,7 @@ fn register_child_processes(instance: InstanceRef) {
             }
         };
 
-        let result = instance.window_adapter().register_child_process(
+        instance.window_adapter().register_child_process(
             command,
             Box::new(make_callback(
                 child.stdout_line.element().clone(),
@@ -2931,10 +2931,5 @@ fn register_child_processes(instance: InstanceRef) {
                 child.stderr_line.name().to_owned(),
             )),
         );
-
-        match result {
-            Ok(()) | Err(PlatformError::Unsupported) => {}
-            Err(error) => panic!("failed to register child process: {error}"),
-        }
     }
 }

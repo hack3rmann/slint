@@ -2690,6 +2690,11 @@ pub fn visit_all_named_references(
                     vis(&mut t.triggered);
                     vis(&mut t.running);
                 });
+                compo.child_processes.borrow_mut().iter_mut().for_each(|c| {
+                    vis(&mut c.command);
+                    vis(&mut c.stdout_line);
+                    vis(&mut c.stderr_line);
+                });
                 for o in compo.optimized_elements.borrow().iter() {
                     visit_element_expressions(o, |expr, _, _| {
                         visit_named_references_in_expression(expr, vis)
