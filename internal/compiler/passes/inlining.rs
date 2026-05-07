@@ -460,6 +460,7 @@ fn duplicate_sub_component(
         init_code: component_to_duplicate.init_code.clone(),
         popup_windows: Default::default(),
         timers: component_to_duplicate.timers.clone(),
+        child_processes: component_to_duplicate.child_processes.clone(),
         menu_item_tree: Default::default(),
         exported_global_names: component_to_duplicate.exported_global_names.clone(),
         used: component_to_duplicate.used.clone(),

@@ -334,6 +334,14 @@ pub struct Timer {
     pub element: ElementWeak,
 }
 
+#[derive(Debug, Clone)]
+pub struct ChildProcess {
+    pub command: NamedReference,
+    pub stdout_line: NamedReference,
+    pub stderr_line: NamedReference,
+    pub element: ElementWeak,
+}
+
 #[derive(Clone, Debug)]
 pub struct ChildrenInsertionPoint {
     pub parent: ElementRc,
@@ -434,6 +442,8 @@ pub struct Component {
 
     /// True if this component is imported from an external library.
     pub from_library: Cell<bool>,
+
+    pub child_processes: RefCell<Vec<ChildProcess>>,
 }
 
 impl Component {

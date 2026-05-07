@@ -157,6 +157,16 @@ pub trait WindowAdapter {
     ) -> Result<raw_window_handle_06::DisplayHandle<'_>, raw_window_handle_06::HandleError> {
         Err(raw_window_handle_06::HandleError::NotSupported)
     }
+
+    /// Re-implement this to support ChildProcess components
+    fn register_child_process(
+        &self,
+        _command: Vec<SharedString>,
+        _on_stdout_line: Box<dyn Fn(SharedString)>,
+        _on_stderr_line: Box<dyn Fn(SharedString)>,
+    ) -> Result<(), PlatformError> {
+        Err(PlatformError::Unsupported)
+    }
 }
 
 /// Implementation details behind [`WindowAdapter`], but since this

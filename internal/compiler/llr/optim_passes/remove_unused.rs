@@ -286,6 +286,7 @@ mod visitor {
             popup_windows,
             menu_item_trees: _,
             timers,
+            child_processes,
             sub_components: _,
             property_init,
             change_callbacks,
@@ -352,6 +353,11 @@ mod visitor {
             visit_expression(t.interval.get_mut(), &scope, state, visitor);
             visit_expression(t.triggered.get_mut(), &scope, state, visitor);
             visit_expression(t.running.get_mut(), &scope, state, visitor);
+        }
+        for c in child_processes {
+            visit_expression(c.command.get_mut(), &scope, state, visitor);
+            visit_expression(c.stdout_line.get_mut(), &scope, state, visitor);
+            visit_expression(c.stderr_line.get_mut(), &scope, state, visitor);
         }
         for (idx, init) in property_init {
             visit_member_reference(idx, &scope, state, visitor);

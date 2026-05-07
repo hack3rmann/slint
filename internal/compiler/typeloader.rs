@@ -358,6 +358,9 @@ impl Snapshotter {
             let timers = RefCell::new(
                 component.timers.borrow().iter().map(|p| self.snapshot_timer(p)).collect(),
             );
+            let child_processes = RefCell::new(
+                component.child_processes.borrow().iter().map(|c| self.snapshot_child_process(c)).collect(),
+            );
             let root_constraints = RefCell::new(
                 self.snapshot_layout_constraints(&component.root_constraints.borrow()),
             );
@@ -382,6 +385,7 @@ impl Snapshotter {
                 parent_element: RefCell::new(parent_element),
                 popup_windows,
                 timers,
+                child_processes,
                 menu_item_tree,
                 private_properties: RefCell::new(component.private_properties.borrow().clone()),
                 root_constraints,
@@ -686,6 +690,15 @@ impl Snapshotter {
             running: timer.running.snapshot(self),
             triggered: timer.triggered.snapshot(self),
             element: timer.element.clone(),
+        }
+    }
+
+    fn snapshot_child_process(&mut self, child: &object_tree::ChildProcess) -> object_tree::ChildProcess {
+        object_tree::ChildProcess {
+            command: child.command.snapshot(self),
+            stdout_line: child.stdout_line.snapshot(self),
+            stderr_line: child.stderr_line.snapshot(self),
+            element: child.element.clone(),
         }
     }
 
