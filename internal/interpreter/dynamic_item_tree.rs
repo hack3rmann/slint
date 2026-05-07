@@ -2908,9 +2908,7 @@ fn register_child_processes(instance: InstanceRef) {
             let instance_weak = instance.self_weak().get().unwrap().clone();
 
             move |line: SharedString| {
-                let Some(instance) = instance_weak.upgrade() else {
-                    return;
-                };
+                let Some(instance) = instance_weak.upgrade() else { return };
 
                 generativity::make_guard!(guard);
                 let c = instance.unerase(guard);
