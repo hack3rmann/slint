@@ -75,11 +75,15 @@ fn lower_child_process(
 
     let command = NamedReference::new(elem, SmolStr::new("command"));
     command.mark_as_set();
+    let stdout_line = NamedReference::new(elem, SmolStr::new("stdout-line"));
+    stdout_line.mark_as_set();
+    let stderr_line = NamedReference::new(elem, SmolStr::new("stderr-line"));
+    stderr_line.mark_as_set();
 
     parent_component.child_processes.borrow_mut().push(ChildProcess {
         command,
-        stdout_line: NamedReference::new(elem, SmolStr::new("stdout-line")),
-        stderr_line: NamedReference::new(elem, SmolStr::new("stderr-line")),
+        stdout_line,
+        stderr_line,
         element: Rc::downgrade(elem),
     });
 }
