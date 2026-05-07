@@ -164,8 +164,7 @@ pub trait WindowAdapter {
         _command: Vec<SharedString>,
         _on_stdout_line: Box<dyn Fn(SharedString)>,
         _on_stderr_line: Box<dyn Fn(SharedString)>,
-    ) -> Result<(), PlatformError> {
-        Err(PlatformError::Unsupported)
+    ) {
     }
 }
 
