@@ -2918,16 +2918,21 @@ fn register_child_processes(instance: InstanceRef) {
             }
         };
 
-        instance.window_adapter().register_child_process(
-            command,
-            Box::new(make_callback(
-                child.stdout_line.element().clone(),
-                child.stdout_line.name().to_owned(),
-            )),
-            Box::new(make_callback(
-                child.stderr_line.element().clone(),
-                child.stderr_line.name().to_owned(),
-            )),
-        );
+        match i_slint_backend_selector::with_platform(|backend| {
+            backend.register_child_process(
+                command,
+                Box::new(make_callback(
+                    child.stdout_line.element().clone(),
+                    child.stdout_line.name().to_owned(),
+                )),
+                Box::new(make_callback(
+                    child.stderr_line.element().clone(),
+                    child.stderr_line.name().to_owned(),
+                )),
+            )
+        }) {
+            Ok(()) | Err(PlatformError::Unsupported) => {}
+            Err(error) => panic!("failed to register child process: {error}"),
+        }
     }
 }
