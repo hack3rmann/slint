@@ -275,6 +275,7 @@ fn lower_sub_component(
         popup_windows: Default::default(),
         menu_item_trees: Vec::new(),
         timers: Default::default(),
+        child_processes: Default::default(),
         sub_components: Default::default(),
         property_init: Default::default(),
         change_callbacks: Default::default(),
@@ -575,6 +576,8 @@ fn lower_sub_component(
         .collect();
 
     sub_component.timers = component.timers.borrow().iter().map(|t| lower_timer(t, &ctx)).collect();
+    sub_component.child_processes =
+        component.child_processes.borrow().iter().map(|c| lower_child_process(c, &ctx)).collect();
 
     crate::generator::for_each_const_properties(component, |elem, n| {
         let x = ctx.map_property_reference(&NamedReference::new(elem, n.clone()));
@@ -862,6 +865,24 @@ fn lower_timer(timer: &object_tree::Timer, ctx: &ExpressionLoweringCtx) -> Timer
             callback: ctx.map_property_reference(&timer.triggered),
             arguments: Vec::new(),
         }
+        .into(),
+    }
+}
+
+fn lower_child_process(
+    child: &object_tree::ChildProcess,
+    ctx: &ExpressionLoweringCtx,
+) -> ChildProcess {
+    ChildProcess {
+        command: super::Expression::PropertyReference(ctx.map_property_reference(&child.command))
+            .into(),
+        stdout_line: super::Expression::PropertyReference(
+            ctx.map_property_reference(&child.stdout_line),
+        )
+        .into(),
+        stderr_line: super::Expression::PropertyReference(
+            ctx.map_property_reference(&child.stderr_line),
+        )
         .into(),
     }
 }

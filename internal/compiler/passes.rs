@@ -30,6 +30,7 @@ mod inlining;
 mod key_bindings;
 mod lower_absolute_coordinates;
 mod lower_accessibility;
+mod lower_child_processes;
 mod lower_component_container;
 mod lower_layout;
 mod lower_menus;
@@ -134,6 +135,7 @@ pub async fn run_passes(
         lower_popups::lower_popups(component, &doc.local_registry, diag);
         collect_init_code::collect_init_code(component);
         lower_timers::lower_timers(component, diag);
+        lower_child_processes::lower_child_processes(component, diag);
     });
 
     inlining::inline(doc, inlining::InlineSelection::InlineOnlyRequiredComponents, diag);

@@ -21,6 +21,7 @@ use alloc::string::String;
 use once_cell::sync::OnceCell;
 #[cfg(all(feature = "std", not(target_arch = "wasm32")))]
 use std::time;
+use std::vec::Vec;
 #[cfg(target_arch = "wasm32")]
 use web_time as time;
 
@@ -152,6 +153,16 @@ pub trait Platform {
     /// The long press interval before showing a context menu
     fn long_press_interval(&self, _: crate::InternalToken) -> core::time::Duration {
         core::time::Duration::from_millis(500)
+    }
+
+    /// Re-implement this to support ChildProcess components
+    fn register_child_process(
+        &self,
+        _command: Vec<SharedString>,
+        _on_stdout_line: Box<dyn Fn(SharedString)>,
+        _on_stderr_line: Box<dyn Fn(SharedString)>,
+    ) -> Result<(), PlatformError> {
+        Err(PlatformError::Unsupported)
     }
 }
 

@@ -833,3 +833,11 @@ export global NativePalette {
     //-is_non_item_type
     //-is_internal
 }
+
+export component ChildProcess {
+    in property <[string]> command;
+    out property <string> stdout-line;
+    out property <string> stderr-line;
+    //-is_non_item_type
+    //-disallow_global_types_as_child_elements
+}

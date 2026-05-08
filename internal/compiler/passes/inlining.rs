@@ -217,6 +217,12 @@ fn inline_element(
         Timer { element: Rc::downgrade(inlined_element), ..t.clone() }
     }));
 
+    root_component.child_processes.borrow_mut().extend(inlined_component.child_processes.borrow().iter().map(|c| {
+        let inlined_element = mapping.get(&element_key(c.element.upgrade().unwrap())).unwrap();
+
+        ChildProcess { element: Rc::downgrade(inlined_element), ..c.clone() }
+    }));
+
     let mut moved_into_popup = HashSet::new();
     if let Some(children) = move_children_into_popup {
         let child_insertion_point = inlined_component.child_insertion_point.borrow();
@@ -342,6 +348,11 @@ fn inline_element(
         fixup_reference(&mut t.running, &mapping);
         fixup_reference(&mut t.triggered, &mapping);
     }
+    for c in root_component.child_processes.borrow_mut().iter_mut() {
+        fixup_reference(&mut c.command, &mapping);
+        fixup_reference(&mut c.stdout_line, &mapping);
+        fixup_reference(&mut c.stderr_line, &mapping);
+    }
     // If some element were moved into PopupWindow, we need to report error if they are used outside of the popup window.
     if !moved_into_popup.is_empty() {
         recurse_elem_no_borrow(&root_component.root_element.clone(), &(), &mut |e, _| {
@@ -460,6 +471,7 @@ fn duplicate_sub_component(
         init_code: component_to_duplicate.init_code.clone(),
         popup_windows: Default::default(),
         timers: component_to_duplicate.timers.clone(),
+        child_processes: component_to_duplicate.child_processes.clone(),
         menu_item_tree: Default::default(),
         exported_global_names: component_to_duplicate.exported_global_names.clone(),
         used: component_to_duplicate.used.clone(),
@@ -490,6 +502,11 @@ fn duplicate_sub_component(
         fixup_reference(&mut t.interval, mapping);
         fixup_reference(&mut t.running, mapping);
         fixup_reference(&mut t.triggered, mapping);
+    }
+    for c in new_component.child_processes.borrow_mut().iter_mut() {
+        fixup_reference(&mut c.command, mapping);
+        fixup_reference(&mut c.stdout_line, mapping);
+        fixup_reference(&mut c.stderr_line, mapping);
     }
     *new_component.menu_item_tree.borrow_mut() = component_to_duplicate
         .menu_item_tree

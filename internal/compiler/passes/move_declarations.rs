@@ -105,6 +105,11 @@ fn do_move_declarations(component: &Rc<Component>) {
         fixup_reference(&mut t.running);
         fixup_reference(&mut t.triggered);
     });
+    component.child_processes.borrow_mut().iter_mut().for_each(|c| {
+        fixup_reference(&mut c.command);
+        fixup_reference(&mut c.stdout_line);
+        fixup_reference(&mut c.stderr_line);
+    });
     component.menu_item_tree.borrow_mut().iter_mut().for_each(|c| {
         visit_all_named_references(c, &mut fixup_reference);
     });

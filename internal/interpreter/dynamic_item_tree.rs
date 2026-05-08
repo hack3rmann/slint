@@ -28,7 +28,7 @@ use i_slint_core::items::{
 use i_slint_core::layout::{LayoutInfo, LayoutItemInfo, Orientation};
 use i_slint_core::lengths::{LogicalLength, LogicalRect};
 use i_slint_core::menus::MenuFromItemTree;
-use i_slint_core::model::{ModelRc, RepeatedItemTree, Repeater};
+use i_slint_core::model::{Model as _, ModelRc, RepeatedItemTree, Repeater};
 use i_slint_core::platform::PlatformError;
 use i_slint_core::properties::{ChangeTracker, InterpolatedPropertyValue};
 use i_slint_core::rtti::{self, AnimatedBindingKind, FieldOffset, PropertyInfo};
@@ -2160,8 +2160,10 @@ impl ErasedItemTreeBox {
                 .unwrap_or_else(|_| panic!("run_setup_code called twice?"));
         }
         update_timers(instance_ref);
+        register_child_processes(instance_ref);
     }
 }
+
 impl<'id> From<ItemTreeBox<'id>> for ErasedItemTreeBox {
     fn from(inner: ItemTreeBox<'id>) -> Self {
         // Safety: Nothing access the component directly, we only access it through unerased where
@@ -2881,5 +2883,56 @@ pub fn restart_timer(element: ElementWeak, instance: InstanceRef) {
     {
         let timer = offset.apply(instance.as_ref());
         timer.restart();
+    }
+}
+
+fn register_child_processes(instance: InstanceRef) {
+    let children = instance.description.original.child_processes.borrow();
+
+    for child in children.iter() {
+        let command: ModelRc<Value> =
+            eval::load_property(instance, &child.command.element(), &child.command.name())
+                .unwrap()
+                .try_into()
+                .expect("command must be an array of strings");
+
+        let command = command
+            .iter()
+            .flat_map(|v| match v {
+                Value::String(s) => Some(s),
+                _ => None,
+            })
+            .collect();
+
+        let make_callback = |elem: ElementRc, name: SmolStr| {
+            let instance_weak = instance.self_weak().get().unwrap().clone();
+
+            move |line: SharedString| {
+                let Some(instance) = instance_weak.upgrade() else { return };
+
+                generativity::make_guard!(guard);
+                let c = instance.unerase(guard);
+                let instance = c.borrow_instance();
+
+                eval::store_property(instance, &elem, &name, Value::String(line)).unwrap();
+            }
+        };
+
+        match i_slint_backend_selector::with_platform(|backend| {
+            backend.register_child_process(
+                command,
+                Box::new(make_callback(
+                    child.stdout_line.element().clone(),
+                    child.stdout_line.name().to_owned(),
+                )),
+                Box::new(make_callback(
+                    child.stderr_line.element().clone(),
+                    child.stderr_line.name().to_owned(),
+                )),
+            )
+        }) {
+            Ok(()) | Err(PlatformError::Unsupported) => {}
+            Err(error) => panic!("failed to register child process: {error}"),
+        }
     }
 }

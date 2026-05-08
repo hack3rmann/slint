@@ -130,6 +130,12 @@ pub fn count_property_use(root: &CompilationUnit) {
             timer.running.borrow().visit_property_references(ctx, &mut visit_property);
             timer.triggered.borrow().visit_property_references(ctx, &mut visit_property);
         }
+        // 12. child_process
+        for child_process in &sc.child_processes {
+            child_process.command.borrow().visit_property_references(ctx, &mut visit_property);
+            child_process.stdout_line.borrow().visit_property_references(ctx, &mut visit_property);
+            child_process.stderr_line.borrow().visit_property_references(ctx, &mut visit_property);
+        }
     });
 
     for (idx, g) in root.globals.iter_enumerated() {

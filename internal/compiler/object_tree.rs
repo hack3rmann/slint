@@ -334,6 +334,14 @@ pub struct Timer {
     pub element: ElementWeak,
 }
 
+#[derive(Debug, Clone)]
+pub struct ChildProcess {
+    pub command: NamedReference,
+    pub stdout_line: NamedReference,
+    pub stderr_line: NamedReference,
+    pub element: ElementWeak,
+}
+
 #[derive(Clone, Debug)]
 pub struct ChildrenInsertionPoint {
     pub parent: ElementRc,
@@ -434,6 +442,8 @@ pub struct Component {
 
     /// True if this component is imported from an external library.
     pub from_library: Cell<bool>,
+
+    pub child_processes: RefCell<Vec<ChildProcess>>,
 }
 
 impl Component {
@@ -2679,6 +2689,11 @@ pub fn visit_all_named_references(
                     vis(&mut t.interval);
                     vis(&mut t.triggered);
                     vis(&mut t.running);
+                });
+                compo.child_processes.borrow_mut().iter_mut().for_each(|c| {
+                    vis(&mut c.command);
+                    vis(&mut c.stdout_line);
+                    vis(&mut c.stderr_line);
                 });
                 for o in compo.optimized_elements.borrow().iter() {
                     visit_element_expressions(o, |expr, _, _| {

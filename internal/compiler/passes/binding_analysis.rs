@@ -246,6 +246,11 @@ fn analyze_element(
             process_property(&t.running.clone().into(), P, context, reverse_aliases, diag);
             process_property(&t.triggered.clone().into(), P, context, reverse_aliases, diag);
         });
+        component.child_processes.borrow().iter().for_each(|c| {
+            process_property(&c.command.clone().into(), P, context, reverse_aliases, diag);
+            process_property(&c.stdout_line.clone().into(), P, context, reverse_aliases, diag);
+            process_property(&c.stderr_line.clone().into(), P, context, reverse_aliases, diag);
+        })
     }
 
     if let Some(repeated) = &elem.borrow().repeated {
